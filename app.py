@@ -107,6 +107,7 @@ if st.button("Predict"):
             X[-1].reshape(1, 60, 8),
             verbose=0
         )
+        st.write("Raw Prediction:", prediction)
 
         confidence = prediction[0][0]
 
