@@ -3,13 +3,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 
-from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.models import load_model
-
-# Load model
-model = load_model("stock_model.h5")
-
-st.title("AI Stock Trend Predictor")
+st.title("Explainable AI Stock Trend Predictor")
 
 stock_symbol = st.text_input(
     "Enter Stock Symbol",
@@ -77,127 +71,113 @@ if st.button("Predict"):
 
         df.dropna(inplace=True)
 
-        features = [
-            'Close',
-            'Volume',
-            'SMA_20',
-            'EMA_20',
-            'RSI',
-            'MACD',
-            'BB_Upper',
-            'BB_Lower'
-        ]
+        latest = df.iloc[-1]
 
-        scaler = MinMaxScaler()
-
-        scaled_data = scaler.fit_transform(
-            df[features]
-        )
-
-        X = []
-
-        for i in range(60, len(scaled_data)):
-            X.append(
-                scaled_data[i-60:i]
-            )
-
-        X = np.array(X)
-
-        prediction = model.predict(
-            X[-1].reshape(1, 60, 8),
-            verbose=0
-        )
-        st.write("Raw Prediction:", prediction)
-
-        confidence = prediction[0][0]
-
-        if confidence > 0.45:
-
-            trend = "Bullish"
-
-            confidence_score = confidence
-
-        else:
-
-            trend = "Bearish"
-
-            confidence_score = 1 - confidence
+        bullish_score = 0
 
         st.success(
             f"Stock Symbol : {stock_symbol}"
         )
 
-        st.success(
-            f"Predicted Trend : {trend}"
-        )
-
-        st.success(
-            f"Confidence Score : {round(confidence_score*100,2)} %"
-        )
         st.subheader("Explanation")
 
-        latest = df.iloc[-1]
-        
-        # RSI explanation
+        # RSI
         if latest['RSI'] > 60:
-            st.write("✓ RSI =", round(latest['RSI'],2),
-                     "→ Positive momentum (Bullish)")
+            bullish_score += 1
+            st.write(
+                f"✓ RSI = {round(latest['RSI'],2)} → Positive momentum (Bullish)"
+            )
+
         elif latest['RSI'] < 40:
-            st.write("✓ RSI =", round(latest['RSI'],2),
-                     "→ Weak momentum (Bearish)")
+            st.write(
+                f"✓ RSI = {round(latest['RSI'],2)} → Weak momentum (Bearish)"
+            )
+
         else:
-            st.write("✓ RSI =", round(latest['RSI'],2),
-                     "→ Neutral")
-        
-        # MACD explanation
+            st.write(
+                f"✓ RSI = {round(latest['RSI'],2)} → Neutral"
+            )
+
+        # MACD
         if latest['MACD'] > 0:
-            st.write("✓ MACD > 0 → Bullish signal")
+            bullish_score += 1
+            st.write(
+                "✓ MACD > 0 → Bullish signal"
+            )
+
         else:
-            st.write("✓ MACD < 0 → Bearish signal")
-        
-        # SMA explanation
+            st.write(
+                "✓ MACD < 0 → Bearish signal"
+            )
+
+        # SMA
         if latest['Close'] > latest['SMA_20']:
-            st.write("✓ Price above SMA20 → Uptrend")
+            bullish_score += 1
+            st.write(
+                "✓ Price above SMA20 → Uptrend"
+            )
+
         else:
-            st.write("✓ Price below SMA20 → Downtrend")
-        
-        # EMA explanation
+            st.write(
+                "✓ Price below SMA20 → Downtrend"
+            )
+
+        # EMA
         if latest['Close'] > latest['EMA_20']:
-            st.write("✓ Price above EMA20 → Strong momentum")
+            bullish_score += 1
+            st.write(
+                "✓ Price above EMA20 → Strong momentum"
+            )
+
         else:
-            st.write("✓ Price below EMA20 → Weak momentum")
-        
-        # Bollinger Bands explanation
+            st.write(
+                "✓ Price below EMA20 → Weak momentum"
+            )
+
+        # Bollinger Bands
         if latest['Close'] > latest['BB_Upper']:
-            st.write("✓ Price above Upper Bollinger Band → Strong Bullish")
+            bullish_score += 1
+            st.write(
+                "✓ Price above Upper Bollinger Band → Strong Bullish"
+            )
+
         elif latest['Close'] < latest['BB_Lower']:
-            st.write("✓ Price below Lower Bollinger Band → Strong Bearish")
-        else:
-            st.write("✓ Price inside Bollinger Bands → Normal volatility")
-        st.subheader("Final Decision")
+            st.write(
+                "✓ Price below Lower Bollinger Band → Strong Bearish"
+            )
 
-        if bullish_score >= 4:
-            trend = "Strong Bullish"
-        
+        else:
+            st.write(
+                "✓ Price inside Bollinger Bands → Normal volatility"
+            )
+
+        st.subheader("Technical Score")
+
+        st.write(
+            f"Bullish Score : {bullish_score}/5"
+        )
+
+        if bullish_score == 5:
+
+            recommendation = "Strong Bullish"
+
         elif bullish_score >= 3:
-            trend = "Bullish"
-        
-        elif bullish_score == 2:
-            trend = "Neutral"
-        
-        else:
-            trend = "Bearish"
-        
-        st.subheader("Explainable AI Summary")
 
-        if trend == "Bullish" and bullish_count >= 3:
-            st.success("Model and indicators agree: Strong Bullish signal")
-        
-        elif trend == "Bearish" and bullish_count < 3:
-            st.error("Model and indicators agree: Strong Bearish signal")
-        
+            recommendation = "Bullish"
+
+        elif bullish_score == 2:
+
+            recommendation = "Neutral"
+
         else:
-            st.warning("Model and technical indicators disagree. Mixed signals detected.")
+
+            recommendation = "Bearish"
+
+        st.subheader("Final Recommendation")
+
+        st.success(
+            recommendation
+        )
 
         st.line_chart(
             df['Close']
