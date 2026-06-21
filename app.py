@@ -179,8 +179,10 @@ if st.button("Predict"):
             recommendation
         )
 
+        st.subheader("Recent Price Trend")
+
         st.line_chart(
-            df['Close']
+            df[['Close','SMA_20','EMA_20']].tail(100)
         )
 
     except Exception as e:
