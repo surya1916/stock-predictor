@@ -1,4 +1,8 @@
 import streamlit as st
+from tensorflow.keras.models import load_model
+
+# Load model
+model = load_model("stock_model.h5")
 
 st.title("AI Stock Trend Predictor")
 
@@ -9,18 +13,22 @@ stock_symbol = st.text_input(
 
 if st.button("Predict"):
 
-    st.success(
-        f"Stock Symbol : {stock_symbol}"
+    prediction = model.predict(
+        [[[0]*8]*60],
+        verbose=0
     )
 
-    st.success(
-        "Predicted Trend : Bullish"
-    )
+    confidence = prediction[0][0]
 
-    st.success(
-        "Confidence Score : 75%"
-    )
+    if confidence > 0.5:
+        trend = "Bullish"
+        confidence_score = confidence
+    else:
+        trend = "Bearish"
+        confidence_score = 1-confidence
 
-    st.line_chart(
-        [10,20,15,25,30,28,35]
+    st.success(f"Stock Symbol : {stock_symbol}")
+    st.success(f"Predicted Trend : {trend}")
+    st.success(
+        f"Confidence Score : {round(confidence_score*100,2)}%"
     )
