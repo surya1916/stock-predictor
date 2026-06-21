@@ -189,10 +189,16 @@ if st.button("Predict"):
         if latest['Close'] > latest['EMA_20']:
             bullish_count += 1
         
-        if bullish_count >= 3:
-            st.success("Overall Technical Sentiment : Bullish")
+        st.subheader("Explainable AI Summary")
+
+        if trend == "Bullish" and bullish_count >= 3:
+            st.success("Model and indicators agree: Strong Bullish signal")
+        
+        elif trend == "Bearish" and bullish_count < 3:
+            st.error("Model and indicators agree: Strong Bearish signal")
+        
         else:
-            st.error("Overall Technical Sentiment : Bearish")
+            st.warning("Model and technical indicators disagree. Mixed signals detected.")
 
         st.line_chart(
             df['Close']
