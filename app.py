@@ -111,7 +111,7 @@ if st.button("Predict"):
 
         confidence = prediction[0][0]
 
-        if confidence > 0.5:
+        if confidence > 0.45:
 
             trend = "Bullish"
 
@@ -176,19 +176,17 @@ if st.button("Predict"):
             st.write("✓ Price inside Bollinger Bands → Normal volatility")
         st.subheader("Final Decision")
 
-        bullish_count = 0
+        if bullish_score >= 4:
+            trend = "Strong Bullish"
         
-        if latest['RSI'] > 60:
-            bullish_count += 1
+        elif bullish_score >= 3:
+            trend = "Bullish"
         
-        if latest['MACD'] > 0:
-            bullish_count += 1
+        elif bullish_score == 2:
+            trend = "Neutral"
         
-        if latest['Close'] > latest['SMA_20']:
-            bullish_count += 1
-        
-        if latest['Close'] > latest['EMA_20']:
-            bullish_count += 1
+        else:
+            trend = "Bearish"
         
         st.subheader("Explainable AI Summary")
 
