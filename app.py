@@ -133,6 +133,46 @@ if st.button("Predict"):
         st.success(
             f"Confidence Score : {round(confidence_score*100,2)} %"
         )
+        st.subheader("Explanation")
+
+        latest = df.iloc[-1]
+        
+        # RSI explanation
+        if latest['RSI'] > 60:
+            st.write("✓ RSI =", round(latest['RSI'],2),
+                     "→ Positive momentum (Bullish)")
+        elif latest['RSI'] < 40:
+            st.write("✓ RSI =", round(latest['RSI'],2),
+                     "→ Weak momentum (Bearish)")
+        else:
+            st.write("✓ RSI =", round(latest['RSI'],2),
+                     "→ Neutral")
+        
+        # MACD explanation
+        if latest['MACD'] > 0:
+            st.write("✓ MACD > 0 → Bullish signal")
+        else:
+            st.write("✓ MACD < 0 → Bearish signal")
+        
+        # SMA explanation
+        if latest['Close'] > latest['SMA_20']:
+            st.write("✓ Price above SMA20 → Uptrend")
+        else:
+            st.write("✓ Price below SMA20 → Downtrend")
+        
+        # EMA explanation
+        if latest['Close'] > latest['EMA_20']:
+            st.write("✓ Price above EMA20 → Strong momentum")
+        else:
+            st.write("✓ Price below EMA20 → Weak momentum")
+        
+        # Bollinger Bands explanation
+        if latest['Close'] > latest['BB_Upper']:
+            st.write("✓ Price above Upper Bollinger Band → Strong Bullish")
+        elif latest['Close'] < latest['BB_Lower']:
+            st.write("✓ Price below Lower Bollinger Band → Strong Bearish")
+        else:
+            st.write("✓ Price inside Bollinger Bands → Normal volatility")
 
         st.line_chart(
             df['Close']
