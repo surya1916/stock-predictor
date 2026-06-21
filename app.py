@@ -173,6 +173,26 @@ if st.button("Predict"):
             st.write("✓ Price below Lower Bollinger Band → Strong Bearish")
         else:
             st.write("✓ Price inside Bollinger Bands → Normal volatility")
+        st.subheader("Final Decision")
+
+        bullish_count = 0
+        
+        if latest['RSI'] > 60:
+            bullish_count += 1
+        
+        if latest['MACD'] > 0:
+            bullish_count += 1
+        
+        if latest['Close'] > latest['SMA_20']:
+            bullish_count += 1
+        
+        if latest['Close'] > latest['EMA_20']:
+            bullish_count += 1
+        
+        if bullish_count >= 3:
+            st.success("Overall Technical Sentiment : Bullish")
+        else:
+            st.error("Overall Technical Sentiment : Bearish")
 
         st.line_chart(
             df['Close']
